@@ -9,6 +9,7 @@ import { detectSpoofing } from '../utils/flags.js';
 import { ATTENDANCE_CONFIG } from '../config/attendance.config.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { logger } from '../middleware/logger.js';
+import { rekognitionService } from '../services/rekognition.service.js';
 
 export const checkIn = async (req: AuthRequest, res: Response) => {
     try {
@@ -72,11 +73,80 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
             ipVerified = true;
         }
 
-        // 4. Photo Verification
-        const photoVerified = !!file;
+        // 4. Face Verification (Enhanced with AWS Rekognition)
+        let photoVerified = false;
+        let faceVerified = false;
+        let faceVerificationDetails: any = null;
+
+        // Check if user has registered their face
+        if (dbUser.faceRegistered && dbUser.faceId) {
+            // User has registered face - verification is REQUIRED
+            if (!file) {
+                return errorResponse(
+                    res,
+                    'Face verification required. Please take a selfie to check in.',
+                    null,
+                    400
+                );
+            }
+
+            // Verify face using AWS Rekognition
+            if (rekognitionService.isAvailable()) {
+                const verificationResult = await rekognitionService.verifyFace(
+                    file.path,
+                    user.id.toString()
+                );
+
+                faceVerificationDetails = {
+                    matched: verificationResult.matched,
+                    similarity: verificationResult.similarity,
+                    confidence: verificationResult.confidence,
+                };
+
+                if (!verificationResult.success) {
+                    logger.error({ userId: user.id, error: verificationResult.error }, 'Face verification failed');
+                    return errorResponse(
+                        res,
+                        'Face verification failed. Please try again.',
+                        { error: verificationResult.error },
+                        400
+                    );
+                }
+
+                if (!verificationResult.matched) {
+                    logger.warn({ userId: user.id, similarity: verificationResult.similarity }, 'Face mismatch');
+                    return errorResponse(
+                        res,
+                        'Face does not match registered face. Access denied.',
+                        {
+                            similarity: verificationResult.similarity,
+                            threshold: 90,
+                        },
+                        403
+                    );
+                }
+
+                // Face matched successfully
+                faceVerified = true;
+                photoVerified = true;
+                logger.info({ userId: user.id, similarity: verificationResult.similarity }, 'Face verified successfully');
+            } else {
+                // Rekognition not available but user has registered face
+                logger.warn('Rekognition not available. Falling back to photo presence check.');
+                photoVerified = !!file;
+            }
+        } else {
+            // User has NOT registered face yet
+            // Just check if photo is present (backward compatibility)
+            photoVerified = !!file;
+
+            if (file) {
+                logger.info(`User ${user.id} has not registered face. Photo uploaded but not verified.`);
+            }
+        }
 
         // MFA
-        const factors = { gpsVerified, qrVerified, ipVerified, photoVerified };
+        const factors = { gpsVerified, qrVerified, ipVerified, photoVerified, faceVerified };
         const verified = evaluateMFA(factors);
 
         // Spoofing
@@ -108,7 +178,8 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
             suspicious: spoofCheck.isSuspicious,
             reasons: spoofCheck.reasons,
             attendanceId: attendance._id,
-            isLate
+            isLate,
+            faceVerification: faceVerificationDetails,
         });
 
     } catch (error) {
