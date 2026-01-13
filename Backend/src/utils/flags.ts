@@ -1,4 +1,4 @@
-import { ATTENDANCE_CONFIG } from '../config/attendance.config.ts';
+import { ATTENDANCE_CONFIG } from '../config/attendance.config.js';
 
 interface SpoofCheckData {
     distanceMeters: number;
