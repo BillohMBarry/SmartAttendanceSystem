@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { mongodbUri } from '../config/config.ts';
-import { logger } from '../middleware/logger.ts';
+import { mongodbUri } from '../config/config.js';
+import { logger } from '../middleware/logger.js';
 
 export const connectToDatabase = async () => {
     try {
