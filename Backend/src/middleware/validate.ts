@@ -20,7 +20,16 @@ export const validate = (schema: ZodSchema, target: ValidationTarget = 'body') =
             const validatedData = schema.parse(dataToValidate);
 
             // Replace the original data with validated/transformed data
-            req[target] = validatedData;
+            if (target === 'query') {
+                Object.defineProperty(req, 'query', {
+                    value: validatedData,
+                    writable: true,
+                    enumerable: true,
+                    configurable: true,
+                });
+            } else {
+                req[target] = validatedData;
+            }
 
             next();
         } catch (error) {
