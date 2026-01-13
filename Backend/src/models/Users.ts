@@ -18,6 +18,12 @@ const UserSchema = new mongoose.Schema({
     photoUrl: { type: String },
     office: { type: officeSchema, required: false },
     isActive: { type: Boolean, default: true },
+
+    // Face Recognition Fields
+    faceId: { type: String }, // AWS Rekognition Face ID
+    faceImageUrl: { type: String }, // URL to the registered face image
+    faceRegistered: { type: Boolean, default: false }, // Flag indicating if face is registered
+    faceRegisteredAt: { type: Date }, // Timestamp of face registration
 }, { timestamps: true });
 
 export const User = mongoose.model('User', UserSchema);
