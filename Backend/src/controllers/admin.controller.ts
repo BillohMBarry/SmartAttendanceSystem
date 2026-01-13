@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import type { AuthRequest } from '../types/auth.types.js';
 import bcrypt from 'bcrypt';
 import { User } from '../models/Users.js';
 import { Attendance } from '../models/Attendance.js';
@@ -61,14 +62,43 @@ export const createUser = async (req: Request, res: Response) => {
     }
 };
 
-export const createQRToken = async (req: Request, res: Response) => {
+export const createQRToken = async (req: AuthRequest, res: Response) => {
     try {
-        const { officeId, expiresInMinutes } = req.body;
-        const token = generateQRToken(officeId, 'admin', expiresInMinutes || 60);
+        if (!req.user) {
+            return errorResponse(res, 'User not authenticated', null, 401);
+        }
+
+        // Fetch admin user from database
+        const dbUser = await User.findById(req.user.id);
+        if (!dbUser) {
+            return errorResponse(res, 'User not found', null, 404);
+        }
+
+        // Check if admin has an office assigned
+        if (!dbUser.office || !(dbUser.office as any)._id) {
+            return errorResponse(res, 'Admin does not have an office assigned', null, 400);
+        }
+
+        const officeId = String((dbUser.office as any)._id);
+
+        // Calculate expiration time: token expires at 5 PM today
+        const now = new Date();
+        const today5PM = new Date(now);
+        today5PM.setHours(17, 0, 0, 0); // 5:00 PM
+
+        // If it's already past 5 PM, set expiration to 5 PM tomorrow
+        const expiresAt = now > today5PM 
+            ? new Date(today5PM.getTime() + 24 * 60 * 60 * 1000) // Tomorrow at 5 PM
+            : today5PM; // Today at 5 PM
+
+        const expiresInMinutes = Math.ceil((expiresAt.getTime() - now.getTime()) / (60 * 1000));
+
+        const token = generateQRToken(officeId, req.user.id, expiresInMinutes);
+        
         return successResponse(res, 'QR Token generated successfully', {
             token,
             officeId,
-            expiresAt: Date.now() + (expiresInMinutes || 60) * 60000
+            expiresAt: expiresAt.getTime()
         });
     } catch (e) {
         return errorResponse(res, 'Failed to generate QR token', e);

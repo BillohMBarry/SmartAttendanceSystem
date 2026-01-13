@@ -301,10 +301,11 @@ export interface QRToken {
 
 /**
  * Generate QR token request
+ * No fields required - office ID comes from authenticated admin's user record
+ * Expiration time is automatically calculated to expire at 5 PM (office closing time)
  */
 export interface GenerateQRTokenRequest {
-    officeId: string;
-    expiresInMinutes?: number;
+    // Empty - all data comes from authenticated user
 }
 
 /**

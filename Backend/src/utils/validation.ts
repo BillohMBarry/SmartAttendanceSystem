@@ -172,14 +172,8 @@ export const updateMeetingSchema = z.object({
 
 // Admin Validation Schemas
 export const createQRTokenSchema = z.object({
-    officeId: z.string()
-        .min(1, 'Office ID is required'),
-    expiresInMinutes: z.number()
-        .int('Expiration time must be an integer')
-        .min(1, 'Expiration time must be at least 1 minute')
-        .max(1440, 'Expiration time cannot exceed 24 hours (1440 minutes)')
-        .optional()
-        .default(60), // Default to 60 minutes
+    // No fields required - office ID comes from authenticated admin's user record
+    // Expiration time is automatically calculated to expire at 5 PM (office closing time)
 });
 
 export const dailyReportQuerySchema = z.object({

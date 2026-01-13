@@ -1,5 +1,16 @@
 {
   "pages": {
+    "/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/login/page.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
+    ],
     "/(dashboard)/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -10,31 +21,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/layout.js"
     ],
-    "/layout": [
+    "/(dashboard)/check-in/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
-    "/(dashboard)/admin/meetings/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/admin/meetings/page.js"
+      "static/chunks/app/(dashboard)/check-in/page.js"
     ],
     "/(dashboard)/admin/qr-tokens/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/admin/qr-tokens/page.js"
     ],
-    "/(dashboard)/admin/reports/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/admin/reports/page.js"
-    ],
     "/(dashboard)/admin/users/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/admin/users/page.js"
+    ],
+    "/(dashboard)/admin/reports/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/admin/reports/page.js"
     ],
     "/(dashboard)/profile/page": [
       "static/chunks/webpack.js",
@@ -51,25 +56,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/meetings/page.js"
     ],
-    "/(dashboard)/history/page": [
+    "/(dashboard)/admin/meetings/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/history/page.js"
-    ],
-    "/(dashboard)/check-in/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/check-in/page.js"
+      "static/chunks/app/(dashboard)/admin/meetings/page.js"
     ],
     "/(dashboard)/check-out/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/check-out/page.js"
     ],
-    "/login/page": [
+    "/(dashboard)/history/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/login/page.js"
+      "static/chunks/app/(dashboard)/history/page.js"
+    ],
+    "/(dashboard)/admin/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/admin/page.js"
     ]
   }
 }

@@ -39,10 +39,12 @@ export const adminService = {
 
     /**
      * Generate a QR token for attendance check-in
-     * @param data - QR token generation request
+     * Office ID comes from authenticated admin's user record
+     * Expiration time is automatically calculated to expire at 5 PM (office closing time)
+     * @param data - Empty object (kept for API consistency)
      * @returns Generated QR token data
      */
-    async generateQRToken(data: GenerateQRTokenRequest): Promise<QRToken> {
+    async generateQRToken(data: GenerateQRTokenRequest = {}): Promise<QRToken> {
         const response = await apiClient.post<ApiResponse<QRToken>>('/admin/qr-token', data);
         return unwrapResponse(response);
     },

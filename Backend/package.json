@@ -41,7 +41,7 @@
     "@aws-sdk/client-rekognition": "^3.948.0",
     "@aws-sdk/lib-storage": "^3.948.0",
     "bcrypt": "^6.0.0",
-    "cloudinary": "^1.41.3",
+    "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",

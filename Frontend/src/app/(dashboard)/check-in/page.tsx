@@ -14,13 +14,11 @@ import { attendanceService } from '@/services/attendance.service';
 import { faceService } from '@/services/face.service';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { LoadingState } from '@/components/ui/Spinner';
 import {
     MapPin,
     Camera,
-    QrCode,
     CheckCircle,
     AlertTriangle,
     RefreshCw,
@@ -61,7 +59,6 @@ export default function CheckInPage() {
     } = useCamera();
 
     const [faceStatus, setFaceStatus] = useState<FaceStatus | null>(null);
-    const [qrToken, setQrToken] = useState('');
     const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoadingStatus, setIsLoadingStatus] = useState(true);
@@ -143,7 +140,6 @@ export default function CheckInPage() {
                 lat: latitude!,
                 lng: longitude!,
                 accuracy: accuracy!,
-                qrToken: qrToken || undefined,
                 comment: comment || undefined,
                 photo: photoFile,
             });
@@ -366,25 +362,6 @@ export default function CheckInPage() {
                     </CardContent>
                 </Card>
             )}
-
-            {/* QR Code section (optional) */}
-            <Card>
-                <CardHeader
-                    title="QR Code (Optional)"
-                    subtitle="Scan the office QR code for additional verification"
-                />
-                <CardContent>
-                    <div className="flex items-center gap-3">
-                        <QrCode className="h-6 w-6 text-gray-400" />
-                        <Input
-                            placeholder="Enter QR token or scan"
-                            value={qrToken}
-                            onChange={(e) => setQrToken(e.target.value)}
-                            fullWidth
-                        />
-                    </div>
-                </CardContent>
-            </Card>
 
             {/* Comment section */}
             <Card>
