@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config/config.ts';
+import { JWT_SECRET } from '../config/config.js';
 
 interface QRTokenPayload {
     officeId: string;
