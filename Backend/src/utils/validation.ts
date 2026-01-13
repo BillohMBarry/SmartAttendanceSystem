@@ -133,13 +133,7 @@ export const createMeetingSchema = z.object({
 }, {
     message: 'End time must be after start time',
     path: ['endTime'],
-}).refine(data => {
-    const now = new Date();
-    return data.startTime > now;
-}, {
-    message: 'Start time must be in the future',
-    path: ['startTime'],
-});
+})
 
 export const updateMeetingSchema = z.object({
     title: z.string()
@@ -179,8 +173,7 @@ export const updateMeetingSchema = z.object({
 // Admin Validation Schemas
 export const createQRTokenSchema = z.object({
     officeId: z.string()
-        .min(1, 'Office ID is required')
-        .regex(/^[0-9a-fA-F]{24}$/, 'Invalid Office ID format (must be a valid MongoDB ObjectId)'),
+        .min(1, 'Office ID is required'),
     expiresInMinutes: z.number()
         .int('Expiration time must be an integer')
         .min(1, 'Expiration time must be at least 1 minute')
@@ -212,6 +205,17 @@ export const validateQRTokenSchema = z.object({
         .max(500, 'Token appears to be invalid (too long)'),
 });
 
+// Face Recognition Validation Schemas
+export const registerFaceSchema = z.object({
+    // File validation is handled by multer middleware
+    // This schema is for any additional fields if needed in the future
+});
+
+export const verifyFaceSchema = z.object({
+    // File validation is handled by multer middleware
+    // This schema is for any additional fields if needed in the future
+});
+
 // Type exports for TypeScript
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -223,3 +227,5 @@ export type UpdateMeetingInput = z.infer<typeof updateMeetingSchema>;
 export type CreateQRTokenInput = z.infer<typeof createQRTokenSchema>;
 export type DailyReportQueryInput = z.infer<typeof dailyReportQuerySchema>;
 export type ValidateQRTokenInput = z.infer<typeof validateQRTokenSchema>;
+export type RegisterFaceInput = z.infer<typeof registerFaceSchema>;
+export type VerifyFaceInput = z.infer<typeof verifyFaceSchema>;
