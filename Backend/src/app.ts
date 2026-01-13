@@ -7,6 +7,7 @@ import attendanceRoutes from './routes/attendance.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import qrRoutes from './routes/qr.routes.js';
 import meetingRoutes from './routes/meeting.routes.js';
+import faceRoutes from './routes/face.routes.js';
 import { requestLogger, logger } from './middleware/logger.js';
 import { handleMulterError } from './middleware/multerErrorHandler.js';
 import { errorResponse } from './utils/response.js';
@@ -35,6 +36,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/qr', qrRoutes);
 app.use('/api/meetings', meetingRoutes);
+app.use('/api/face', faceRoutes);
 
 app.get('/', (req, res) => {
     res.send('Attendance System API is running.');
