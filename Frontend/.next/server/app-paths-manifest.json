@@ -1,0 +1,9 @@
+{
+  "/(dashboard)/check-out/page": "app/(dashboard)/check-out/page.js",
+  "/(dashboard)/check-in/page": "app/(dashboard)/check-in/page.js",
+  "/(dashboard)/admin/qr-tokens/page": "app/(dashboard)/admin/qr-tokens/page.js",
+  "/(dashboard)/profile/page": "app/(dashboard)/profile/page.js",
+  "/(dashboard)/admin/users/page": "app/(dashboard)/admin/users/page.js",
+  "/(dashboard)/page": "app/(dashboard)/page.js",
+  "/(dashboard)/face-registration/page": "app/(dashboard)/face-registration/page.js"
+}
