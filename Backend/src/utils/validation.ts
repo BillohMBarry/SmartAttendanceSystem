@@ -71,9 +71,7 @@ export const employeeSignupSchema = z.object({
         .toLowerCase()
         .transform(val => val.trim()),
     password: passwordValidator,
-    jobTitle: z.enum(['softwareEngineer', 'marketer', 'intern', 'designer', 'manager', 'analyst', 'developer'], {
-        message: 'Please select a valid job title'
-    }),
+    jobTitle: z.string().min(1, 'Please select a job title'),
 });
 
 export const updateProfileSchema = z.object({
