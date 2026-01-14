@@ -10,7 +10,8 @@
     "dev": "tsx watch src/server.ts",
     "lint": "eslint 'src/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "tsx src/scripts/seedAdmin.ts"
+    "seed": "tsx src/scripts/seedAdmin.ts",
+    "seed:jobs": "tsx src/scripts/seedJobTitles.ts"
   },
   "keywords": [],
   "author": "",
