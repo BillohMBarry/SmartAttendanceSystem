@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
 /**
  * Login form validation schema
@@ -114,6 +115,16 @@ export default function LoginPage() {
                             Sign In
                         </Button>
                     </form>
+
+                    {/* Signup link */}
+                    <div className="mt-6 text-center">
+                        <p className="text-sm text-gray-600">
+                            Don't have an account?{' '}
+                            <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
+                                Sign up
+                            </Link>
+                        </p>
+                    </div>
                 </Card>
 
                 {/* Footer */}
