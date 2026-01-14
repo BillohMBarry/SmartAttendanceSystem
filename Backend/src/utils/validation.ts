@@ -36,7 +36,7 @@ const passwordValidator = z.string()
 export const loginSchema = z.object({
     email: z.string()
         .min(1, 'Email is required')
-        .email('Invalid email address')
+        .email({ message: 'Invalid email address' })
         .toLowerCase()
         .transform(val => val.trim()),
     password: z.string().min(1, 'Password is required'),
@@ -48,7 +48,7 @@ export const registerSchema = z.object({
         .max(100, 'Name must not exceed 100 characters')
         .transform(val => val.trim()),
     email: z.string()
-        .email('Invalid email address')
+        .email({ message: 'Invalid email address' })
         .toLowerCase()
         .transform(val => val.trim()),
     password: passwordValidator,
@@ -59,6 +59,21 @@ export const registerSchema = z.object({
     jobTitle: z.string()
         .max(100, 'Job title must not exceed 100 characters')
         .optional(),
+});
+
+export const employeeSignupSchema = z.object({
+    name: z.string()
+        .min(2, 'Name must be at least 2 characters')
+        .max(100, 'Name must not exceed 100 characters')
+        .transform(val => val.trim()),
+    email: z.string()
+        .email({ message: 'Invalid email address' })
+        .toLowerCase()
+        .transform(val => val.trim()),
+    password: passwordValidator,
+    jobTitle: z.enum(['softwareEngineer', 'marketer', 'intern', 'designer', 'manager', 'analyst', 'developer'], {
+        message: 'Please select a valid job title'
+    }),
 });
 
 export const updateProfileSchema = z.object({
@@ -213,6 +228,7 @@ export const verifyFaceSchema = z.object({
 // Type exports for TypeScript
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type EmployeeSignupInput = z.infer<typeof employeeSignupSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type CheckInInput = z.infer<typeof checkInSchema>;
 export type CheckOutInput = z.infer<typeof checkOutSchema>;
