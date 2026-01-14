@@ -44,6 +44,36 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
+export const employeeSignup = async (req: Request, res: Response) => {
+    try {
+        const { name, email, password, jobTitle } = req.body;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return errorResponse(res, 'Email already registered', null, 400);
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({
+            name,
+            email,
+            passwordHash: hashedPassword,
+            role: 'employee',
+            jobTitle,
+            isActive: true,
+        });
+        await user.save();
+
+        return successResponse(res, 'Account created successfully', { userId: user._id }, 201);
+    } catch (error) {
+        if (error instanceof Error && error.message.includes('duplicate key')) {
+            return errorResponse(res, 'Email already registered', null, 400);
+        }
+        return errorResponse(res, 'Error creating account', error);
+    }
+};
+
 export const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
         const { name, jobTitle } = req.body;
