@@ -5,30 +5,20 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/services/auth.service';
+import { jobService, JobTitle } from '@/services/job.service';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { User, Mail, Lock, Briefcase, AlertCircle, CheckCircle } from 'lucide-react';
 
-/**
- * Job title options for the dropdown
- */
-const JOB_TITLES = [
-    { value: 'softwareEngineer', label: 'Software Engineer' },
-    { value: 'marketer', label: 'Marketer' },
-    { value: 'intern', label: 'Intern' },
-    { value: 'designer', label: 'Designer' },
-    { value: 'manager', label: 'Manager' },
-    { value: 'analyst', label: 'Analyst' },
-    { value: 'developer', label: 'Developer' },
-] as const;
+
 
 /**
  * Signup form validation schema
@@ -40,9 +30,7 @@ const signupSchema = z.object({
     email: z.string()
         .email('Please enter a valid email address')
         .toLowerCase(),
-    jobTitle: z.enum(['softwareEngineer', 'marketer', 'intern', 'designer', 'manager', 'analyst', 'developer'], {
-        errorMap: () => ({ message: 'Please select a job title' })
-    }),
+    jobTitle: z.string().min(1, 'Please select a job title'),
     password: z.string()
         .min(8, 'Password must be at least 8 characters')
         .refine(
@@ -70,6 +58,15 @@ export default function SignupPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
+
+    useEffect(() => {
+        const fetchJobTitles = async () => {
+            const titles = await jobService.getJobTitles();
+            setJobTitles(titles);
+        };
+        fetchJobTitles();
+    }, []);
 
     const {
         register,
@@ -179,7 +176,7 @@ export default function SignupPage() {
                                     {...register('jobTitle')}
                                 >
                                     <option value="">Select your job title</option>
-                                    {JOB_TITLES.map((title) => (
+                                    {jobTitles.map((title) => (
                                         <option key={title.value} value={title.value}>
                                             {title.label}
                                         </option>
