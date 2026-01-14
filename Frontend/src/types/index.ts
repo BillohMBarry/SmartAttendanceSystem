@@ -68,6 +68,16 @@ export interface LoginResponse {
 }
 
 /**
+ * Employee signup request payload
+ */
+export interface EmployeeSignupRequest {
+    name: string;
+    email: string;
+    password: string;
+    jobTitle: string;
+}
+
+/**
  * Register user request payload
  */
 export interface RegisterRequest {

@@ -1,7 +1,6 @@
 {
-  "/(dashboard)/history/page": "app/(dashboard)/history/page.js",
-  "/(dashboard)/admin/reports/page": "app/(dashboard)/admin/reports/page.js",
-  "/(dashboard)/meetings/page": "app/(dashboard)/meetings/page.js",
-  "/(dashboard)/face-registration/page": "app/(dashboard)/face-registration/page.js",
-  "/(dashboard)/profile/page": "app/(dashboard)/profile/page.js"
+  "/login/page": "app/login/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/(dashboard)/page": "app/(dashboard)/page.js",
+  "/(dashboard)/admin/meetings/page": "app/(dashboard)/admin/meetings/page.js"
 }

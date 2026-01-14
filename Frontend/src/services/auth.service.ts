@@ -7,6 +7,7 @@ import apiClient, { unwrapResponse } from '@/lib/api-client';
 import type {
     LoginRequest,
     LoginResponse,
+    EmployeeSignupRequest,
     RegisterRequest,
     UpdateProfileRequest,
     User,
@@ -25,6 +26,16 @@ export const authService = {
      */
     async login(credentials: LoginRequest): Promise<LoginResponse> {
         const response = await apiClient.post<ApiResponse<LoginResponse>>('/auth/login', credentials);
+        return unwrapResponse(response);
+    },
+
+    /**
+     * Sign up a new employee (public endpoint)
+     * @param data - Employee signup data
+     * @returns Created user ID
+     */
+    async signup(data: EmployeeSignupRequest): Promise<{ userId: string }> {
+        const response = await apiClient.post<ApiResponse<{ userId: string }>>('/auth/signup', data);
         return unwrapResponse(response);
     },
 

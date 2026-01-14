@@ -9,7 +9,7 @@ import type { NextRequest } from 'next/server';
 /**
  * Public routes that don't require authentication
  */
-const publicRoutes = ['/login'];
+const publicRoutes = ['/login', '/signup'];
 
 /**
  * Admin-only routes that require admin role

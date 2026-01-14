@@ -5,12 +5,13 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { meetingService } from '@/services/meeting.service';
 import { adminService } from '@/services/admin.service';
+import { jobService, type JobTitle } from '@/services/job.service';
 import { useToast } from '@/components/ui/Toast';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -18,7 +19,7 @@ import { Input } from '@/components/ui/Input';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { LoadingState } from '@/components/ui/Spinner';
-import { Plus, Calendar, Clock, MapPin, Trash2, Edit, Users } from 'lucide-react';
+import { Plus, Calendar, Clock, MapPin, Trash2, Edit, Users, X } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Meeting, User } from '@/types';
 
@@ -45,6 +46,7 @@ export default function AdminMeetingsPage() {
     const toast = useToast();
     const [meetings, setMeetings] = useState<Meeting[]>([]);
     const [users, setUsers] = useState<User[]>([]);
+    const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
@@ -57,6 +59,7 @@ export default function AdminMeetingsPage() {
         handleSubmit,
         reset,
         setValue,
+        watch,
         formState: { errors },
     } = useForm<MeetingFormData>({
         resolver: zodResolver(meetingSchema),
@@ -66,18 +69,44 @@ export default function AdminMeetingsPage() {
         },
     });
 
+    const selectedAttendeeIds = watch('attendees');
+    const [selectedJobTitle, setSelectedJobTitle] = useState<string>('');
+
+    // Filter users based on job title
+    const filteredUsers = useMemo(() => {
+        return users.filter(u =>
+            (!selectedJobTitle || u.jobTitle === selectedJobTitle) &&
+            !selectedAttendeeIds?.includes(u._id) // Filter out already selected
+        );
+    }, [users, selectedJobTitle, selectedAttendeeIds]);
+
+    const handleAddAttendee = (userId: string) => {
+        if (!userId) return;
+        const current = selectedAttendeeIds || [];
+        if (!current.includes(userId)) {
+            setValue('attendees', [...current, userId]);
+        }
+    };
+
+    const removeAttendee = (userId: string) => {
+        const current = selectedAttendeeIds || [];
+        setValue('attendees', current.filter(id => id !== userId));
+    };
+
     /**
      * Fetch meetings and users on mount
      */
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [meetingsData, usersData] = await Promise.all([
+                const [meetingsData, usersData, jobTitlesData] = await Promise.all([
                     meetingService.listMeetings(),
                     adminService.listUsers(),
+                    jobService.getJobTitles(),
                 ]);
                 setMeetings(meetingsData);
                 setUsers(usersData);
+                setJobTitles(jobTitlesData);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
                 toast.error('Failed to load data');
@@ -278,6 +307,72 @@ export default function AdminMeetingsPage() {
                         />
                     </div>
 
+                    {/* New Attendee Selection UI */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Add Attendees
+                        </label>
+                        <div className="flex gap-4 mb-3">
+                            <div className="w-1/2">
+                                <select
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    value={selectedJobTitle}
+                                    onChange={(e) => setSelectedJobTitle(e.target.value)}
+                                >
+                                    <option value="">All Job Titles</option>
+                                    {jobTitles.map((title) => (
+                                        <option key={title.value} value={title.value}>
+                                            {title.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="w-1/2">
+                                <select
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    value=""
+                                    onChange={(e) => handleAddAttendee(e.target.value)}
+                                >
+                                    <option value="">Select Employee...</option>
+                                    {filteredUsers.map((user) => (
+                                        <option key={user._id} value={user._id}>
+                                            {user.name} ({user.jobTitle || 'No Title'})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Selected Attendees List */}
+                        <div className="min-h-[60px] p-3 border border-gray-200 rounded-lg bg-gray-50 flex flex-wrap gap-2">
+                            {selectedAttendeeIds?.length === 0 && (
+                                <p className="text-sm text-gray-400 w-full text-center py-1">
+                                    No attendees selected
+                                </p>
+                            )}
+                            {selectedAttendeeIds?.map((id) => {
+                                const user = users.find(u => u._id === id);
+                                if (!user) return null;
+                                return (
+                                    <span
+                                        key={id}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-gray-700 shadow-sm"
+                                    >
+                                        <span className="w-2 h-2 rounded-full bg-primary-500"></span>
+                                        {user.name}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeAttendee(id)}
+                                            className="text-gray-400 hover:text-danger-500 transition-colors"
+                                        >
+                                            <X className="h-3.5 w-3.5" />
+                                        </button>
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <Input
                             label="Start Time"
@@ -309,23 +404,7 @@ export default function AdminMeetingsPage() {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                            Attendees
-                        </label>
-                        <select
-                            multiple
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 h-32"
-                            {...register('attendees')}
-                        >
-                            {users.map((user) => (
-                                <option key={user._id} value={user._id}>
-                                    {user.name} ({user.email})
-                                </option>
-                            ))}
-                        </select>
-                        <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
-                    </div>
+
 
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="secondary" onClick={closeModal}>
