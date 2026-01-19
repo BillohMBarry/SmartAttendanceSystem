@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 /**
@@ -33,6 +33,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginPage() {
     const { login, isLoading } = useAuth();
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const {
         register,
@@ -96,9 +97,22 @@ export default function LoginPage() {
                         {/* Password input */}
                         <Input
                             label="Password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             placeholder="Enter your password"
                             leftIcon={<Lock className="h-5 w-5" />}
+                            rightIcon={
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="focus:outline-none hover:text-gray-600 transition-colors"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
+                                </button>
+                            }
                             error={errors.password?.message}
                             {...register('password')}
                         />
@@ -119,7 +133,7 @@ export default function LoginPage() {
                     {/* Signup link */}
                     <div className="mt-6 text-center">
                         <p className="text-sm text-gray-600">
-                            Don't have an account?{' '}
+                            Don&apos;t have an account?{' '}
                             <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
                                 Sign up
                             </Link>
