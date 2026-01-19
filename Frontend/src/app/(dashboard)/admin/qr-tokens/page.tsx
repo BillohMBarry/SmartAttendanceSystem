@@ -82,7 +82,7 @@ export default function AdminQRTokensPage() {
                     <form onSubmit={handleSubmit(onGenerate)} className="space-y-4">
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                             <p className="text-sm text-blue-800">
-                                <strong>Note:</strong> The QR token will be generated for your assigned office and will automatically expire at 5:00 PM today (or tomorrow if it's already past 5 PM).
+                                <strong>Note:</strong> The QR token will be generated for your assigned office and will automatically expire at 5:00 PM today (or tomorrow if it&apos;s already past 5 PM).
                             </p>
                         </div>
 
