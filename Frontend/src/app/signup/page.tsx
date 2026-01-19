@@ -16,7 +16,7 @@ import { jobService, JobTitle } from '@/services/job.service';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { User, Mail, Lock, Briefcase, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Mail, Lock, Briefcase, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 
 
 
@@ -45,6 +45,11 @@ const signupSchema = z.object({
             (password) => /[0-9]/.test(password),
             'Password must contain at least one number'
         ),
+    confirmPassword: z.string()
+        .min(1, 'Please confirm your password'),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
 });
 
 type SignupFormData = z.infer<typeof signupSchema>;
@@ -59,6 +64,8 @@ export default function SignupPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         const fetchJobTitles = async () => {
@@ -79,6 +86,7 @@ export default function SignupPage() {
             email: '',
             jobTitle: undefined,
             password: '',
+            confirmPassword: '',
         },
     });
 
@@ -90,7 +98,9 @@ export default function SignupPage() {
         setIsLoading(true);
 
         try {
-            await authService.signup(data);
+            // Remove confirmPassword before sending to API
+            const { confirmPassword, ...signupData } = data;
+            await authService.signup(signupData);
             setIsSuccess(true);
             // Redirect to login after 2 seconds
             setTimeout(() => {
@@ -191,12 +201,48 @@ export default function SignupPage() {
                         {/* Password input */}
                         <Input
                             label="Password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             placeholder="Enter your password"
                             leftIcon={<Lock className="h-5 w-5" />}
+                            rightIcon={
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="focus:outline-none hover:text-gray-600 transition-colors"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
+                                </button>
+                            }
                             error={errors.password?.message}
                             helperText="Must be at least 8 characters with uppercase, lowercase, and number"
                             {...register('password')}
+                        />
+
+                        {/* Confirm Password input */}
+                        <Input
+                            label="Confirm Password"
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="Confirm your password"
+                            leftIcon={<Lock className="h-5 w-5" />}
+                            rightIcon={
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="focus:outline-none hover:text-gray-600 transition-colors"
+                                >
+                                    {showConfirmPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
+                                </button>
+                            }
+                            error={errors.confirmPassword?.message}
+                            {...register('confirmPassword')}
                         />
 
                         {/* Submit button */}
