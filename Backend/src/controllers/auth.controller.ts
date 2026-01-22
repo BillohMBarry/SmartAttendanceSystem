@@ -11,15 +11,16 @@ export const login = async (req: Request, res: Response) => {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
 
+
         if (!user) {
-            return errorResponse(res, 'Invalid credentials', null, 401);
+            return errorResponse(res, 'Incorrect email', null, 401);
         }
 
         // Handle plain text vs hashed for initial setup compatibility if needed, 
         // but strictly prefer bcrypt.
         const match = await bcrypt.compare(password, user.passwordHash);
         if (!match) {
-            return errorResponse(res, 'Invalid credentials', null, 401);
+            return errorResponse(res, 'Incorrect password', null, 401);
         }
 
         const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
