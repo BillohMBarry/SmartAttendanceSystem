@@ -10,6 +10,7 @@ import type {
     CheckOutRequest,
     CheckOutResponse,
     Attendance,
+    AttendanceStatusResponse,
     ApiResponse,
 } from '@/types';
 
@@ -30,6 +31,7 @@ export const attendanceService = {
             lng: data.lng,
             accuracy: data.accuracy,
             qrToken: data.qrToken,
+            stationId: data.stationId,
             comment: data.comment,
         });
 
@@ -70,6 +72,16 @@ export const attendanceService = {
      */
     async getHistory(): Promise<Attendance[]> {
         const response = await apiClient.get<ApiResponse<Attendance[]>>('/attendance/me/history');
+        return unwrapResponse(response);
+    },
+
+    /**
+     * Get current attendance status for today
+     * Used by smart QR scan to determine whether to show check-in or check-out
+     * @returns Current status and today's records
+     */
+    async getAttendanceStatus(): Promise<AttendanceStatusResponse> {
+        const response = await apiClient.get<ApiResponse<AttendanceStatusResponse>>('/attendance/status');
         return unwrapResponse(response);
     },
 };
