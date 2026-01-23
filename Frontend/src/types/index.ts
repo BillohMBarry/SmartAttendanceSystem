@@ -181,6 +181,7 @@ export interface CheckInRequest {
     lng: number;
     accuracy: number;
     qrToken?: string;
+    stationId?: string;
     comment?: string;
     photo?: File;
 }
@@ -209,6 +210,7 @@ export interface CheckOutRequest {
     lat: number;
     lng: number;
     accuracy: number;
+    stationId?: string;
     comment?: string;
 }
 
@@ -218,6 +220,16 @@ export interface CheckOutRequest {
 export interface CheckOutResponse {
     isEarlyLeave: boolean;
     timestamp: string;
+}
+
+/**
+ * Attendance status response for smart QR scan logic
+ */
+export interface AttendanceStatusResponse {
+    status: 'not-checked-in' | 'checked-in' | 'checked-out';
+    lastCheckIn: Attendance | null;
+    lastCheckOut: Attendance | null;
+    todayRecords: Attendance[];
 }
 
 // =============================================================================
