@@ -13,7 +13,7 @@ import { rekognitionService } from '../services/rekognition.service.js';
 
 export const checkIn = async (req: AuthRequest, res: Response) => {
     try {
-        const { lat, lng, accuracy, qrToken, comment } = req.body;
+        const { lat, lng, accuracy, qrToken, comment, stationId } = req.body;
         const file = req.file;
         const user = req.user;
         const ip = req.ip || req.socket.remoteAddress || '';
@@ -190,7 +190,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
 
 export const checkOut = async (req: AuthRequest, res: Response) => {
     try {
-        const { lat, lng, accuracy, comment } = req.body;
+        const { lat, lng, accuracy, comment, stationId } = req.body;
         const user = req.user;
 
         if (!user) {
@@ -224,6 +224,54 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
         });
     } catch (error) {
         return errorResponse(res, 'Check-out failed', error);
+    }
+};
+
+export const getAttendanceStatus = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            return errorResponse(res, 'User not authenticated', null, 401);
+        }
+
+        // Get today's date range (start and end of day)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        // Find today's attendance records
+        const todayRecords = await Attendance.find({
+            userId: req.user.id,
+            timestamp: {
+                $gte: today,
+                $lt: tomorrow
+            }
+        }).sort({ timestamp: -1 });
+
+        // Determine current status
+        const lastCheckIn = todayRecords.find(r => r.type === 'check-in');
+        const lastCheckOut = todayRecords.find(r => r.type === 'check-out');
+
+        let status = 'not-checked-in';
+        if (lastCheckIn && !lastCheckOut) {
+            status = 'checked-in';
+        } else if (lastCheckIn && lastCheckOut) {
+            // Compare timestamps to see which is more recent
+            if (lastCheckIn.timestamp > lastCheckOut.timestamp) {
+                status = 'checked-in';
+            } else {
+                status = 'checked-out';
+            }
+        }
+
+        return successResponse(res, 'Attendance status retrieved', {
+            status,
+            lastCheckIn: lastCheckIn || null,
+            lastCheckOut: lastCheckOut || null,
+            todayRecords
+        });
+    } catch (error) {
+        return errorResponse(res, 'Error fetching attendance status', error);
     }
 };
 
