@@ -10,6 +10,7 @@ const router = Router();
 
 router.post('/check-in', authenticateToken, upload.single('photo'), parseDevice, validate(checkInSchema), attendanceController.checkIn);
 router.post('/check-out', authenticateToken, validate(checkOutSchema), attendanceController.checkOut);
+router.get('/status', authenticateToken, attendanceController.getAttendanceStatus);
 router.get('/me/history', authenticateToken, attendanceController.getHistory);
 
 export default router;
