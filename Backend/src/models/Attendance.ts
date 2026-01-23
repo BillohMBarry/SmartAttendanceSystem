@@ -25,6 +25,7 @@ export interface IAttendance extends Document {
     isLate: boolean;
     isEarlyLeave: boolean;
     userComment: string;
+    stationId?: string;
     meta: any;
 }
 
@@ -59,6 +60,7 @@ const AttendanceSchema = new mongoose.Schema({
     isLate: { type: Boolean, default: false },
     isEarlyLeave: { type: Boolean, default: false },
     userComment: { type: String },
+    stationId: { type: String },
 
     // Spoofing
     isSuspicious: { type: Boolean, default: false },
