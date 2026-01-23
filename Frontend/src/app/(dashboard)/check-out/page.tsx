@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useToast } from '@/components/ui/Toast';
 import { attendanceService } from '@/services/attendance.service';
@@ -21,6 +21,8 @@ import { MapPin, CheckCircle, AlertTriangle, RefreshCw, Clock } from 'lucide-rea
  */
 export default function CheckOutPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const stationIdParam = searchParams.get('stationId');
     const toast = useToast();
 
     // Geolocation hook
@@ -71,6 +73,7 @@ export default function CheckOutPage() {
                 lat: latitude!,
                 lng: longitude!,
                 accuracy: accuracy!,
+                stationId: stationIdParam || undefined,
                 comment: comment || undefined,
             });
 
@@ -148,6 +151,18 @@ export default function CheckOutPage() {
                         <p className="text-warning-700">
                             It&apos;s before 5:00 PM. This check-out will be marked as{' '}
                             <strong>early leave</strong>.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Station ID Detected Alert */}
+            {stationIdParam && (
+                <Card variant="bordered" className="border-primary-300 bg-primary-50">
+                    <CardContent className="flex items-center gap-3 py-4">
+                        <CheckCircle className="h-5 w-5 text-primary-600" />
+                        <p className="text-primary-700">
+                            Checking out from: <strong>{stationIdParam.replace(/-/g, ' ')}</strong>
                         </p>
                     </CardContent>
                 </Card>

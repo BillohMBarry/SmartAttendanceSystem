@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useCamera } from '@/hooks/useCamera';
 import { useToast } from '@/components/ui/Toast';
@@ -31,6 +31,9 @@ import type { FaceStatus } from '@/types';
  */
 export default function CheckInPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const qrTokenParam = searchParams.get('qr_token');
+    const stationIdParam = searchParams.get('stationId');
     const toast = useToast();
 
     // Geolocation hook
@@ -140,6 +143,8 @@ export default function CheckInPage() {
                 lat: latitude!,
                 lng: longitude!,
                 accuracy: accuracy!,
+                qrToken: qrTokenParam || undefined,
+                stationId: stationIdParam || undefined,
                 comment: comment || undefined,
                 photo: photoFile,
             });
@@ -251,6 +256,36 @@ export default function CheckInPage() {
                     Verify your location and identity to check in
                 </p>
             </div>
+
+            {/* Station ID Detected Alert */}
+            {stationIdParam && (
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center gap-3">
+                    <div className="p-2 bg-primary-100 rounded-full">
+                        <CheckCircle className="h-5 w-5 text-primary-600" />
+                    </div>
+                    <div>
+                        <p className="font-medium text-primary-900">Station Identified</p>
+                        <p className="text-sm text-primary-700">
+                            Checking in at: {stationIdParam.replace(/-/g, ' ')}
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* QR Token Detected Alert */}
+            {qrTokenParam && !stationIdParam && (
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center gap-3">
+                    <div className="p-2 bg-primary-100 rounded-full">
+                        <CheckCircle className="h-5 w-5 text-primary-600" />
+                    </div>
+                    <div>
+                        <p className="font-medium text-primary-900">QR Token Detected</p>
+                        <p className="text-sm text-primary-700">
+                            You are checking in via QR code.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Location section */}
             <Card>

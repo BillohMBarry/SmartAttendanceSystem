@@ -108,7 +108,7 @@ export default function AdminQRTokensPage() {
                         <div className="text-center">
                             <div className="inline-flex items-center justify-center p-4 bg-white rounded-lg border-2 border-gray-200">
                                 <QRCode
-                                    value={generatedToken.token}
+                                    value={`${window.location.origin}/check-in?qr_token=${generatedToken.token}`}
                                     size={256}
                                     level="M"
                                     bgColor="#FFFFFF"
