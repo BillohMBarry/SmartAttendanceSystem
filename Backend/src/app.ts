@@ -9,6 +9,7 @@ import qrRoutes from './routes/qr.routes.js';
 import meetingRoutes from './routes/meeting.routes.js';
 import faceRoutes from './routes/face.routes.js';
 import jobRoutes from './routes/job.routes.js';
+import configRoutes from './routes/config.routes.js';
 import { requestLogger, logger } from './middleware/logger.js';
 import { handleMulterError } from './middleware/multerErrorHandler.js';
 import { errorResponse } from './utils/response.js';
@@ -39,6 +40,7 @@ app.use('/api/qr', qrRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/face', faceRoutes);
 app.use('/api/jobs', jobRoutes); // Added jobRoutes
+app.use('/api/config', configRoutes);
 
 app.get('/', (req, res) => {
     res.send('Attendance System API is running.');
