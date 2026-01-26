@@ -37,6 +37,21 @@ export default function AdminQRTokensPage() {
     const [generatedToken, setGeneratedToken] = useState<QRToken | null>(null);
     const [createdAt, setCreatedAt] = useState<Date | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [publicUrl, setPublicUrl] = useState<string | null>(null);
+
+    React.useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const config = await adminService.getSystemConfig();
+                if (config.publicUrl) {
+                    setPublicUrl(config.publicUrl);
+                }
+            } catch (error) {
+                console.error('Failed to fetch system config:', error);
+            }
+        };
+        fetchConfig();
+    }, []);
 
     const {
         handleSubmit,
@@ -108,7 +123,7 @@ export default function AdminQRTokensPage() {
                         <div className="text-center">
                             <div className="inline-flex items-center justify-center p-4 bg-white rounded-lg border-2 border-gray-200">
                                 <QRCode
-                                    value={`${window.location.origin}/check-in?qr_token=${generatedToken.token}`}
+                                    value={`${publicUrl || window.location.origin}/check-in?qr_token=${generatedToken.token}`}
                                     size={256}
                                     level="M"
                                     bgColor="#FFFFFF"
