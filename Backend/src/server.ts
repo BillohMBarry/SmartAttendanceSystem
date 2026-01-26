@@ -1,4 +1,5 @@
 import app from './app.js';
+import listenNgrok from './config/ngrok.config.js';
 import config from './config/config.js';
 import { connectToDatabase } from './mongoDBConnection/mongodb.js';
 import { logger } from './middleware/logger.js';
@@ -9,6 +10,10 @@ import { rekognitionService } from './services/rekognition.service.js';
 const startServer = async () => {
     try {
         await connectToDatabase();
+
+        // Initialize AWS Rekognition collection
+        const ngrokUrl = await listenNgrok(config.port);
+        config.publicUrl = ngrokUrl || '';
 
         // Initialize AWS Rekognition collection
         try {
