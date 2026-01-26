@@ -80,4 +80,13 @@ export const adminService = {
         });
         return response.data;
     },
+
+    /**
+     * Get system configuration
+     * @returns System config object including publicUrl
+     */
+    async getSystemConfig(): Promise<{ publicUrl: string | null }> {
+        const response = await apiClient.get<ApiResponse<{ publicUrl: string | null }>>('/config');
+        return unwrapResponse(response);
+    },
 };
