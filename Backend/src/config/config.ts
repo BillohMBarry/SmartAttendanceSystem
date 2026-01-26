@@ -4,11 +4,13 @@ dotenv.config();
 interface Config {
     port: number;
     nodeEnv: string;
+    publicUrl?: string; // Dynamic URL for Ngrok or other tunnel
 }
 
 const config: Config = {
     port: Number(process.env.PORT) || 3000,
     nodeEnv: process.env.NODE_ENV || 'development',
+    publicUrl: '',
 }
 export const mongodbUri: string = process.env.Mongodb_Connection_String || 'mongodb://localhost:27017/attendance-system';
 // JWT Secret - Required for security
