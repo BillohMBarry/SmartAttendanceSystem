@@ -10,6 +10,7 @@ import meetingRoutes from './routes/meeting.routes.js';
 import faceRoutes from './routes/face.routes.js';
 import jobRoutes from './routes/job.routes.js';
 import configRoutes from './routes/config.routes.js';
+import qrScanRoutes from './routes/qr-scan.routes.js';
 import { requestLogger, logger } from './middleware/logger.js';
 import { handleMulterError } from './middleware/multerErrorHandler.js';
 import { errorResponse } from './utils/response.js';
@@ -31,6 +32,9 @@ app.use(requestLogger);
 
 // Serve uploads
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+// QR Scan Routes (public, at root level)
+app.use('/', qrScanRoutes);
 
 // Routes
 app.use('/api/auth', authRoutes);
