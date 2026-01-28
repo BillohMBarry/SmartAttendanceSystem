@@ -5,7 +5,10 @@ const router = Router();
 
 router.get('/', (req, res) => {
     res.json({
-        publicUrl: config.publicUrl || null
+        success: true,
+        data: {
+            publicUrl: config.publicUrl || null
+        }
     });
 });
 
