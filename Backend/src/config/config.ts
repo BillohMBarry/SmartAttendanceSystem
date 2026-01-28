@@ -5,12 +5,14 @@ interface Config {
     port: number;
     nodeEnv: string;
     publicUrl?: string; // Dynamic URL for Ngrok or other tunnel
+    frontendUrl: string;
 }
 
 const config: Config = {
     port: Number(process.env.PORT) || 3000,
     nodeEnv: process.env.NODE_ENV || 'development',
     publicUrl: '',
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 }
 export const mongodbUri: string = process.env.Mongodb_Connection_String || 'mongodb://localhost:27017/attendance-system';
 // JWT Secret - Required for security
