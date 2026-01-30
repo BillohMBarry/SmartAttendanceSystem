@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useToast } from '@/components/ui/Toast';
@@ -13,13 +13,14 @@ import { attendanceService } from '@/services/attendance.service';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { LoadingState } from '@/components/ui/Spinner';
 import { MapPin, CheckCircle, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
 
 /**
  * Check-out Page Component
  * Simple attendance check-out with location
  */
-export default function CheckOutPage() {
+function CheckOutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const stationIdParam = searchParams.get('stationId');
@@ -246,5 +247,13 @@ export default function CheckOutPage() {
                 Submit Check-Out
             </Button>
         </div>
+    );
+}
+
+export default function CheckOutPage() {
+    return (
+        <Suspense fallback={<LoadingState message="Loading check-out..." />}>
+            <CheckOutContent />
+        </Suspense>
     );
 }

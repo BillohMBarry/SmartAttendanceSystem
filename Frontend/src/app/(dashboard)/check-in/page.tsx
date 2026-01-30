@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useCamera } from '@/hooks/useCamera';
@@ -29,7 +29,7 @@ import type { FaceStatus } from '@/types';
  * Check-in Page Component
  * Multi-factor attendance check-in with GPS, camera, and QR
  */
-export default function CheckInPage() {
+function CheckInContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const qrTokenParam = searchParams.get('qr_token');
@@ -427,5 +427,13 @@ export default function CheckInPage() {
                 Submit Check-In
             </Button>
         </div>
+    );
+}
+
+export default function CheckInPage() {
+    return (
+        <Suspense fallback={<LoadingState message="Loading check-in..." />}>
+            <CheckInContent />
+        </Suspense>
     );
 }
