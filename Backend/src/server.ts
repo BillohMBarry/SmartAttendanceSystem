@@ -12,8 +12,11 @@ const startServer = async () => {
         await connectToDatabase();
 
         // Initialize AWS Rekognition collection
-        const ngrokUrl = await listenNgrok(config.port);
-        config.publicUrl = ngrokUrl || '';
+        // Initialize ngrok only in development or if explicitly disabled in production
+        if (config.nodeEnv !== 'production') {
+            const ngrokUrl = await listenNgrok(config.port);
+            config.publicUrl = ngrokUrl || '';
+        }
 
         // Initialize AWS Rekognition collection
         try {
