@@ -4,5 +4,7 @@ export const ATTENDANCE_CONFIG = {
     MAX_ACCURACY_METERS: 80,
     // Add known office IPs here. 
     // Example: ['192.168.1.1', '203.0.113.5']
-    OFFICE_IP_RANGES: [] as string[]
+    OFFICE_IP_RANGES: process.env.OFFICE_IP_RANGES
+        ? process.env.OFFICE_IP_RANGES.split(',').map(ip => ip.trim())
+        : [] as string[]
 };
