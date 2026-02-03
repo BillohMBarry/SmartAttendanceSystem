@@ -28,12 +28,6 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
         const hour = now.getHours();
 
         // Strict 10:00 AM cutoff for "Late"
-        // 10:01 is late.
-        // Assuming checkin is only possible if user is not blocked? User wanted "remove block".
-        // Keep weekend block? "attendance there only able to check in ... from 8 to 5 pm monday to friday" 
-        // User REVISED: "if sarah checkin at 12 the system shouldn't block the checkin but flag it as late."
-        // Meaning: Do NOT block anymore based on time.
-
         const isLate = (hour >= 10 && now.getMinutes() > 0) || hour > 10;
 
         const dbUser = await User.findById(user.id)
@@ -69,8 +63,21 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
 
         // 3. IP Verification
         let ipVerified = false;
-        if (ATTENDANCE_CONFIG.OFFICE_IP_RANGES.includes(ip)) {
+        if (ATTENDANCE_CONFIG.OFFICE_IP_RANGES.includes('*') || ATTENDANCE_CONFIG.OFFICE_IP_RANGES.includes(ip)) {
             ipVerified = true;
+        }
+
+        // CRITICAL: Enforce strict location check
+        // User must be verified by GPS OR IP to check in.
+        // We do not strictly require QR if GPS is good (depends on policy), but request was to prevent "checking in from home".
+        // Use flag: must be at office (GPS) OR on office network (IP).
+        if (!gpsVerified && !ipVerified) {
+            logger.warn({ userId: user.id, distance, ip, gpsVerified, ipVerified }, 'Check-in blocked: Not at office');
+            return errorResponse(res, 'Access Denied: You must be at the office to check in.', {
+                distance,
+                requiredDistance: ATTENDANCE_CONFIG.MAX_DISTANCE_METERS,
+                ipVerified
+            }, 403);
         }
 
         // 4. Face Verification (Enhanced with AWS Rekognition)
@@ -192,9 +199,44 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
     try {
         const { lat, lng, accuracy, comment, stationId } = req.body;
         const user = req.user;
+        const ip = req.ip || req.socket.remoteAddress || '';
 
         if (!user) {
             return errorResponse(res, 'User not authenticated', null, 401);
+        }
+
+        const dbUser = await User.findById(user.id)
+        if (!dbUser || !dbUser.office) {
+            return errorResponse(res, 'User or Office not found', null, 400);
+        }
+
+        // 1. GPS Verification
+        const numLat = Number(lat);
+        const numLng = Number(lng);
+        const numAcc = Number(accuracy);
+
+        let gpsVerified = false;
+        let distance = 0;
+
+        if (!isNaN(numLat) && !isNaN(numLng) && !isNaN(numAcc)) {
+            distance = getDistanceFromLatLonInMeters(numLat, numLng, dbUser.office.lat, dbUser.office.lng);
+            gpsVerified = distance <= ATTENDANCE_CONFIG.MAX_DISTANCE_METERS && numAcc <= ATTENDANCE_CONFIG.MAX_ACCURACY_METERS;
+        }
+
+        // 2. IP Verification
+        let ipVerified = false;
+        if (ATTENDANCE_CONFIG.OFFICE_IP_RANGES.includes('*') || ATTENDANCE_CONFIG.OFFICE_IP_RANGES.includes(ip)) {
+            ipVerified = true;
+        }
+
+        // CRITICAL: Strict enforcement
+        if (!gpsVerified && !ipVerified) {
+            logger.warn({ userId: user.id, distance, ip, gpsVerified, ipVerified }, 'Check-out blocked: Not at office');
+            return errorResponse(res, 'Access Denied: You must be at the office to check out.', {
+                distance,
+                requiredDistance: ATTENDANCE_CONFIG.MAX_DISTANCE_METERS,
+                ipVerified
+            }, 403);
         }
 
         // Time Check - Flag as Early if before 17:00 (5:00 PM)
@@ -211,6 +253,9 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
                 lng: Number(lng),
                 accuracyMeters: Number(accuracy)
             },
+            ipAddress: ip,
+            gpsVerified,
+            ipVerified,
             timestamp: now,
             isEarlyLeave,
             userComment: comment
@@ -220,7 +265,9 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
 
         return successResponse(res, 'Check-out processed', {
             isEarlyLeave,
-            timestamp: now
+            timestamp: now,
+            gpsVerified,
+            ipVerified
         });
     } catch (error) {
         return errorResponse(res, 'Check-out failed', error);
