@@ -100,6 +100,7 @@ export const checkInSchema = z.object({
     comment: z.string()
         .max(500, 'Comment must not exceed 500 characters')
         .optional(),
+    stationId: z.string().optional(),
 });
 
 export const checkOutSchema = z.object({
@@ -115,6 +116,7 @@ export const checkOutSchema = z.object({
     comment: z.string()
         .max(500, 'Comment must not exceed 500 characters')
         .optional(),
+    stationId: z.string().optional(),
 });
 
 // Meeting Validation Schemas
