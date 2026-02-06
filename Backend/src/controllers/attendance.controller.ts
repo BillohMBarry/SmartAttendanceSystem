@@ -197,7 +197,7 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
 
 export const checkOut = async (req: AuthRequest, res: Response) => {
     try {
-        const { lat, lng, accuracy, comment, stationId } = req.body;
+        const { lat, lng, accuracy, qrToken, comment, stationId } = req.body;
         const user = req.user;
         const ip = req.ip || req.socket.remoteAddress || '';
 
@@ -223,7 +223,18 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
             gpsVerified = distance <= ATTENDANCE_CONFIG.MAX_DISTANCE_METERS && numAcc <= ATTENDANCE_CONFIG.MAX_ACCURACY_METERS;
         }
 
-        // 2. IP Verification
+        // 2. QR Verification
+        let qrVerified = false;
+        let qrData = null;
+        if (qrToken) {
+            qrData = verifyQRToken(qrToken);
+            // Check if token office matches user office
+            if (qrData && String(qrData.officeId) === String((dbUser.office as any)._id)) {
+                qrVerified = true;
+            }
+        }
+
+        // 3. IP Verification
         let ipVerified = false;
         if (ATTENDANCE_CONFIG.OFFICE_IP_RANGES.includes('*') || ATTENDANCE_CONFIG.OFFICE_IP_RANGES.includes(ip)) {
             ipVerified = true;
@@ -254,7 +265,9 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
                 accuracyMeters: Number(accuracy)
             },
             ipAddress: ip,
+            qrTokenId: qrToken,
             gpsVerified,
+            qrVerified,
             ipVerified,
             timestamp: now,
             isEarlyLeave,
@@ -267,6 +280,7 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
             isEarlyLeave,
             timestamp: now,
             gpsVerified,
+            qrVerified,
             ipVerified
         });
     } catch (error) {
