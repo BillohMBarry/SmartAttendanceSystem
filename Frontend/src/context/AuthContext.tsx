@@ -106,14 +106,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 faceRegistered: false,
             });
 
-            // Redirect to dashboard
-            router.push('/');
+            // Note: Redirect is now handled by the login page to support redirect URLs
         } catch (error) {
             throw error;
         } finally {
             setIsLoading(false);
         }
-    }, [router]);
+    }, []);
 
     /**
      * Logout user and clear state
