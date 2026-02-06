@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { LoadingState } from '@/components/ui/Spinner';
 
 /**
  * Login form validation schema
@@ -28,10 +29,10 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 /**
- * Login Page Component
- * Provides email/password authentication with form validation
+ * Login Form Component
+ * Handles the actual form logic and search params
  */
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get('redirect');
@@ -72,6 +73,81 @@ export default function LoginPage() {
     };
 
     return (
+        <Card variant="elevated" className="p-8">
+            {/* Error message */}
+            {error && (
+                <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-danger-600 flex-shrink-0" />
+                    <p className="text-sm text-danger-700">{error}</p>
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                {/* Email input */}
+                <Input
+                    label="Email Address"
+                    type="email"
+                    placeholder="Enter your email"
+                    leftIcon={<Mail className="h-5 w-5" />}
+                    error={errors.email?.message}
+                    {...register('email')}
+                />
+
+                {/* Password input */}
+                <Input
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    leftIcon={<Lock className="h-5 w-5" />}
+                    rightIcon={
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="focus:outline-none hover:text-gray-600 transition-colors"
+                        >
+                            {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                            ) : (
+                                <Eye className="h-5 w-5" />
+                            )}
+                        </button>
+                    }
+                    error={errors.password?.message}
+                    {...register('password')}
+                />
+
+                {/* Submit button */}
+                <Button
+                    type="submit"
+                    variant="primary"
+                    fullWidth
+                    size="lg"
+                    isLoading={isLoading}
+                    className="mt-6"
+                >
+                    Sign In
+                </Button>
+            </form>
+
+            {/* Signup link */}
+            <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600">
+                    Don&apos;t have an account?{' '}
+                    <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
+                        Sign up
+                    </Link>
+                </p>
+            </div>
+        </Card>
+    );
+}
+
+/**
+ * Login Page Component
+ * Provides email/password authentication with form validation
+ */
+export default function LoginPage() {
+    return (
         <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 {/* Logo and title */}
@@ -83,73 +159,14 @@ export default function LoginPage() {
                     <p className="text-gray-500 mt-1">Sign in to your attendance account</p>
                 </div>
 
-                {/* Login card */}
-                <Card variant="elevated" className="p-8">
-                    {/* Error message */}
-                    {error && (
-                        <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg flex items-center gap-3">
-                            <AlertCircle className="h-5 w-5 text-danger-600 flex-shrink-0" />
-                            <p className="text-sm text-danger-700">{error}</p>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                        {/* Email input */}
-                        <Input
-                            label="Email Address"
-                            type="email"
-                            placeholder="Enter your email"
-                            leftIcon={<Mail className="h-5 w-5" />}
-                            error={errors.email?.message}
-                            {...register('email')}
-                        />
-
-                        {/* Password input */}
-                        <Input
-                            label="Password"
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="Enter your password"
-                            leftIcon={<Lock className="h-5 w-5" />}
-                            rightIcon={
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="focus:outline-none hover:text-gray-600 transition-colors"
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="h-5 w-5" />
-                                    ) : (
-                                        <Eye className="h-5 w-5" />
-                                    )}
-                                </button>
-                            }
-                            error={errors.password?.message}
-                            {...register('password')}
-                        />
-
-                        {/* Submit button */}
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            fullWidth
-                            size="lg"
-                            isLoading={isLoading}
-                            className="mt-6"
-                        >
-                            Sign In
-                        </Button>
-                    </form>
-
-                    {/* Signup link */}
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600">
-                            Don&apos;t have an account?{' '}
-                            <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
-                                Sign up
-                            </Link>
-                        </p>
-                    </div>
-                </Card>
+                {/* Login card with Suspense */}
+                <Suspense fallback={
+                    <Card variant="elevated" className="p-8">
+                        <LoadingState message="Loading..." />
+                    </Card>
+                }>
+                    <LoginForm />
+                </Suspense>
 
                 {/* Footer */}
                 <p className="text-center text-sm text-gray-500 mt-6">
