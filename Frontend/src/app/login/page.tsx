@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -31,6 +32,10 @@ type LoginFormData = z.infer<typeof loginSchema>;
  * Provides email/password authentication with form validation
  */
 export default function LoginPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectUrl = searchParams.get('redirect');
+
     const { login, isLoading } = useAuth();
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
@@ -55,7 +60,12 @@ export default function LoginPage() {
 
         try {
             await login(data);
-            // Redirect happens in AuthContext
+            // Redirect to stored URL or dashboard
+            if (redirectUrl) {
+                router.push(decodeURIComponent(redirectUrl));
+            } else {
+                router.push('/');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
         }
