@@ -113,6 +113,7 @@ export const checkOutSchema = z.object({
     accuracy: z.union([z.string(), z.number()])
         .transform(val => Number(val))
         .pipe(accuracyValidator),
+    qrToken: z.string().optional(),
     comment: z.string()
         .max(500, 'Comment must not exceed 500 characters')
         .optional(),
