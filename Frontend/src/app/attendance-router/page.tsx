@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { attendanceService } from '@/services/attendance.service';
 import { LoadingState } from '@/components/ui/Spinner';
@@ -84,5 +84,13 @@ function AttendanceRouterContent() {
 }
 
 export default function AttendanceRouterPage() {
-    return <AttendanceRouterContent />;
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen">
+                <LoadingState message="Loading..." />
+            </div>
+        }>
+            <AttendanceRouterContent />
+        </Suspense>
+    );
 }
