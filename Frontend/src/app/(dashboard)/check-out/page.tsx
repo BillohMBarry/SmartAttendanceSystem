@@ -23,6 +23,7 @@ import { MapPin, CheckCircle, AlertTriangle, RefreshCw, Clock } from 'lucide-rea
 function CheckOutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const qrTokenParam = searchParams.get('qr_token');
     const stationIdParam = searchParams.get('stationId');
     const toast = useToast();
 
@@ -74,6 +75,7 @@ function CheckOutContent() {
                 lat: latitude!,
                 lng: longitude!,
                 accuracy: accuracy!,
+                qrToken: qrTokenParam || undefined,
                 stationId: stationIdParam || undefined,
                 comment: comment || undefined,
             });
@@ -152,6 +154,18 @@ function CheckOutContent() {
                         <p className="text-warning-700">
                             It&apos;s before 5:00 PM. This check-out will be marked as{' '}
                             <strong>early leave</strong>.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* QR Token Detected Alert */}
+            {qrTokenParam && !stationIdParam && (
+                <Card variant="bordered" className="border-primary-300 bg-primary-50">
+                    <CardContent className="flex items-center gap-3 py-4">
+                        <CheckCircle className="h-5 w-5 text-primary-600" />
+                        <p className="text-primary-700">
+                            <strong>QR Token Detected</strong> - You are checking out via QR code.
                         </p>
                     </CardContent>
                 </Card>
