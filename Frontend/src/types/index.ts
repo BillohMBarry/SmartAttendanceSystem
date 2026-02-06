@@ -210,6 +210,7 @@ export interface CheckOutRequest {
     lat: number;
     lng: number;
     accuracy: number;
+    qrToken?: string;
     stationId?: string;
     comment?: string;
 }
