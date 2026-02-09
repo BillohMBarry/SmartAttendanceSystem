@@ -21,6 +21,10 @@ const app = express();
 // Security Middleware - Apply helmet first for security headers
 app.use(helmet());
 
+// Enable trust proxy to correctly identify client IP behind proxies (nginx, ngrok, etc.)
+// This is critical for IP-based attendance validation.
+app.set('trust proxy', true);
+
 // Middleware
 app.use(cors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
