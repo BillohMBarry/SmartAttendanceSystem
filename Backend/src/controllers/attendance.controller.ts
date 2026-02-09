@@ -72,11 +72,18 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
         // We do not strictly require QR if GPS is good (depends on policy), but request was to prevent "checking in from home".
         // Use flag: must be at office (GPS) OR on office network (IP).
         if (!gpsVerified && !ipVerified) {
-            logger.warn({ userId: user.id, distance, ip, gpsVerified, ipVerified }, 'Check-in blocked: Not at office');
+            logger.warn({ userId: user.id, distance, ip, accuracy: numAcc, gpsVerified, ipVerified }, 'Check-in blocked: Not at office');
             return errorResponse(res, 'Access Denied: You must be at the office to check in.', {
-                distance,
-                requiredDistance: ATTENDANCE_CONFIG.MAX_DISTANCE_METERS,
-                ipVerified
+                reason: 'Location verification failed',
+                details: {
+                    distanceMeters: Math.round(distance),
+                    accuracyMeters: numAcc,
+                    allowedDistance: ATTENDANCE_CONFIG.MAX_DISTANCE_METERS,
+                    allowedAccuracy: ATTENDANCE_CONFIG.MAX_ACCURACY_METERS,
+                    ipAddress: ip,
+                    isIpVerified: ipVerified,
+                    isGpsVerified: gpsVerified
+                }
             }, 403);
         }
 
@@ -242,11 +249,18 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
 
         // CRITICAL: Strict enforcement
         if (!gpsVerified && !ipVerified) {
-            logger.warn({ userId: user.id, distance, ip, gpsVerified, ipVerified }, 'Check-out blocked: Not at office');
+            logger.warn({ userId: user.id, distance, ip, accuracy: numAcc, gpsVerified, ipVerified }, 'Check-out blocked: Not at office');
             return errorResponse(res, 'Access Denied: You must be at the office to check out.', {
-                distance,
-                requiredDistance: ATTENDANCE_CONFIG.MAX_DISTANCE_METERS,
-                ipVerified
+                reason: 'Location verification failed',
+                details: {
+                    distanceMeters: Math.round(distance),
+                    accuracyMeters: numAcc,
+                    allowedDistance: ATTENDANCE_CONFIG.MAX_DISTANCE_METERS,
+                    allowedAccuracy: ATTENDANCE_CONFIG.MAX_ACCURACY_METERS,
+                    ipAddress: ip,
+                    isIpVerified: ipVerified,
+                    isGpsVerified: gpsVerified
+                }
             }, 403);
         }
 
