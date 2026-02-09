@@ -61,6 +61,9 @@ export function useGeolocation(): UseGeolocationResult {
     /**
      * Get current GPS position with high accuracy
      */
+    /**
+     * Get current GPS position with fallback retry
+     */
     const getCurrentPosition = useCallback(async (): Promise<void> => {
         // Check if geolocation is supported
         if (!navigator.geolocation) {
@@ -74,17 +77,33 @@ export function useGeolocation(): UseGeolocationResult {
 
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
+        // Helper to get position with specific options
+        const getPosition = (options: PositionOptions): Promise<GeolocationPosition> => {
+            return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, options);
+            });
+        };
+
         try {
-            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(
-                    resolve,
-                    reject,
-                    {
-                        enableHighAccuracy: true, // GPS for higher accuracy
-                        timeout: 30000, // 30 second timeout
-                        maximumAge: 0, // Don't use cached position
-                    }
-                );
+            // Attempt 1: High Accuracy (GPS)
+            // Timeout reduced to 10s to fail faster if GPS is weak
+            const position = await getPosition({
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 5000,
+            }).catch(async (err) => {
+                // If permission denied, don't retry - just throw
+                if (err.code === err.PERMISSION_DENIED) throw err;
+
+                console.warn('High accuracy location failed, trying fallback...', err.message);
+
+                // Attempt 2: Low Accuracy (Wi-Fi/Cellular) via IP or strict fallback
+                // Longer timeout (20s) and older cached data allowed (30s)
+                return await getPosition({
+                    enableHighAccuracy: false,
+                    timeout: 20000,
+                    maximumAge: 30000,
+                });
             });
 
             setState({
@@ -94,21 +113,24 @@ export function useGeolocation(): UseGeolocationResult {
                 error: null,
                 isLoading: false,
             });
-        } catch (error) {
+        } catch (error: any) {
             let errorMessage = 'Failed to get location';
 
-            if (error instanceof GeolocationPositionError) {
+            // Handle GeolocationPositionError
+            if (error.code) {
                 switch (error.code) {
-                    case error.PERMISSION_DENIED:
+                    case 1: // PERMISSION_DENIED
                         errorMessage = 'Location access denied. Please enable location permissions.';
                         break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = 'Location information is unavailable.';
+                    case 2: // POSITION_UNAVAILABLE
+                        errorMessage = 'Location information is unavailable. Check your GPS or network.';
                         break;
-                    case error.TIMEOUT:
-                        errorMessage = 'Location request timed out. Please try again.';
+                    case 3: // TIMEOUT
+                        errorMessage = 'Location request timed out. Please check signal or move to an open area.';
                         break;
                 }
+            } else if (error.message) {
+                errorMessage = error.message;
             }
 
             setState((prev) => ({
