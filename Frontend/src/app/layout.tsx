@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     description: 'A comprehensive attendance management system with GPS verification, face recognition, and multi-factor authentication.',
     keywords: ['attendance', 'management', 'GPS', 'face recognition', 'employee'],
     authors: [{ name: 'Attendance System Team' }],
+    icons: {
+        icon: '/favicon.png',
+    },
 };
 
 /**
