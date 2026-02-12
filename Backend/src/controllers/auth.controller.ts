@@ -53,7 +53,7 @@ export const employeeSignup = async (req: Request, res: Response) => {
             name: 'Headquarters',
             location: 'Main Office',
             lat: 8.48379,
-            lng: -13.25474,
+            lng: 13.25473,
             radiusMeters: 100
         }
         // Check if user already exists
