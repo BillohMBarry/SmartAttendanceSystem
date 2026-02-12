@@ -29,8 +29,8 @@ const seedAdmin = async () => {
             office: {
                 name: 'Headquarters',
                 location: 'Main Office',
-                lat: 0,
-                lng: 0,
+                lat: 8.48379,
+                lng: -13.25474,
                 radiusMeters: 100
             },
             isActive: true
