@@ -25,7 +25,39 @@ export const attendanceService = {
      * @returns Check-in verification result
      */
     async checkIn(data: CheckInRequest): Promise<CheckInResponse> {
-        // Create FormData for multipart upload (if photo is included)
+        /**
+         * IMPORTANT:
+         * The backend `/attendance/check-in` endpoint currently expects JSON
+         * (parsed by Express) and runs Zod validation on `req.body`.
+         *
+         * When we always send `multipart/form-data` (even without a photo),
+         * `req.body` ends up empty because no Multer middleware is attached,
+         * causing "Validation failed" errors in production.
+         *
+         * Strategy:
+         * - If NO photo is provided → send a normal JSON payload.
+         * - If a photo IS provided  → send multipart/form-data so the backend
+         *   can later be wired up with Multer for file handling.
+         */
+
+        // Case 1: No photo → simple JSON body (works with current backend)
+        if (!data.photo) {
+            const response = await apiClient.post<ApiResponse<CheckInResponse>>(
+                '/attendance/check-in',
+                {
+                    lat: data.lat,
+                    lng: data.lng,
+                    accuracy: data.accuracy,
+                    qrToken: data.qrToken,
+                    stationId: data.stationId,
+                    comment: data.comment,
+                }
+            );
+
+            return unwrapResponse(response);
+        }
+
+        // Case 2: Photo present → multipart/form-data for future file support
         const formData = createFormData({
             lat: data.lat,
             lng: data.lng,
@@ -35,10 +67,7 @@ export const attendanceService = {
             comment: data.comment,
         });
 
-        // Append photo file if provided
-        if (data.photo) {
-            formData.append('photo', data.photo);
-        }
+        formData.append('photo', data.photo);
 
         const response = await apiClient.post<ApiResponse<CheckInResponse>>(
             '/attendance/check-in',
