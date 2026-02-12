@@ -5,7 +5,11 @@ const nextConfig = {
 
     // Configure allowed image domains if needed
     images: {
-        domains: ['localhost'],
+        remotePatterns: [
+            {
+                hostname: 'localhost',
+            },
+        ],
     },
 
     // Environment variables exposed to the browser
