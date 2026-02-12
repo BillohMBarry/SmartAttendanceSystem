@@ -49,6 +49,13 @@ export const employeeSignup = async (req: Request, res: Response) => {
     try {
         const { name, email, password, jobTitle } = req.body;
 
+        const officeAddress = {
+            name: 'Headquarters',
+            location: 'Main Office',
+            lat: 8.48379,
+            lng: -13.25474,
+            radiusMeters: 100
+        }
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -63,6 +70,7 @@ export const employeeSignup = async (req: Request, res: Response) => {
             role: 'employee',
             jobTitle,
             isActive: true,
+            office: officeAddress
         });
         await user.save();
 
