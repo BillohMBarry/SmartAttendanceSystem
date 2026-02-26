@@ -32,8 +32,11 @@ export const checkIn = async (req: AuthRequest, res: Response) => {
 
         const dbUser = await User.findById(user.id)
         // .populate('office');
-        if (!dbUser || !dbUser.office) {
-            return errorResponse(res, 'User or Office not found', null, 400);
+        if (!dbUser) {
+            return errorResponse(res, 'User not found in database', null, 404);
+        }
+        if (!dbUser.office) {
+            return errorResponse(res, 'Office not assigned to user. Please contact administrator.', null, 400);
         }
 
         // 1. GPS Verification
@@ -213,8 +216,11 @@ export const checkOut = async (req: AuthRequest, res: Response) => {
         }
 
         const dbUser = await User.findById(user.id)
-        if (!dbUser || !dbUser.office) {
-            return errorResponse(res, 'User or Office not found', null, 400);
+        if (!dbUser) {
+            return errorResponse(res, 'User not found in database', null, 404);
+        }
+        if (!dbUser.office) {
+            return errorResponse(res, 'Office not assigned to user. Please contact administrator.', null, 400);
         }
 
         // 1. GPS Verification
