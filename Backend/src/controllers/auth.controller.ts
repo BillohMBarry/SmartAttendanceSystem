@@ -37,7 +37,16 @@ export const register = async (req: Request, res: Response) => {
     try {
         const { name, email, password, role, office, jobTitle } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ name, email, passwordHash: hashedPassword, role, office, jobTitle });
+
+        let finalOffice = office;
+        if (!finalOffice && (role === 'employee' || !role)) {
+            const admin = await User.findOne({ role: 'admin' });
+            if (admin && admin.office) {
+                finalOffice = admin.office;
+            }
+        }
+
+        const user = new User({ name, email, passwordHash: hashedPassword, role, office: finalOffice, jobTitle });
         await user.save();
         return successResponse(res, 'User created', { userId: user._id }, 201);
     } catch (error) {
@@ -49,13 +58,14 @@ export const employeeSignup = async (req: Request, res: Response) => {
     try {
         const { name, email, password, jobTitle } = req.body;
 
-        const officeAddress = {
+        const admin = await User.findOne({ role: 'admin' });
+        const defaultOffice = admin?.office || {
             name: 'Headquarters',
             location: 'Main Office',
             lat: 8.48379,
             lng: 13.25473,
             radiusMeters: 100
-        }
+        };
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -70,7 +80,7 @@ export const employeeSignup = async (req: Request, res: Response) => {
             role: 'employee',
             jobTitle,
             isActive: true,
-            office: officeAddress
+            office: defaultOffice
         });
         await user.save();
 
