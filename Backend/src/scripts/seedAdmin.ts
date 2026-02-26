@@ -11,18 +11,18 @@ const seedAdmin = async () => {
         logger.info('Connected to MongoDB for seeding');
 
         // Check if admin already exists
-        const existingAdmin = await User.findOne({ email: 'admin@example.com' });
+        const existingAdmin = await User.findOne({ email: 'cmdasladmin@gmail.com' });
         if (existingAdmin) {
             logger.info('Admin user already exists');
             process.exit(0);
         }
 
         // Create new admin user
-        const hashedPassword = await bcrypt.hash('password123', 10);
+        const hashedPassword = await bcrypt.hash('Password-123', 10);
 
         const adminUser = new User({
             name: 'System Admin',
-            email: 'admin@example.com',
+            email: 'cmdasladmin@gmail.com',
             passwordHash: hashedPassword,
             role: 'admin',
             jobTitle: 'System Administrator',
@@ -38,8 +38,8 @@ const seedAdmin = async () => {
 
         await adminUser.save();
         logger.info('Admin user created successfully');
-        logger.info('Email: admin@example.com');
-        logger.info('Password: password123');
+        logger.info('Email: cmdasladmin@gmail.com');
+        logger.info('Password: Password-123');
 
         process.exit(0);
     } catch (error) {
