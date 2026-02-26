@@ -35,12 +35,20 @@ export const createUser = async (req: Request, res: Response) => {
         // Hash password before saving
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        let finalOffice = office;
+        if (!finalOffice && (role === 'employee' || !role)) {
+            const admin = await User.findOne({ role: 'admin' });
+            if (admin && admin.office) {
+                finalOffice = admin.office;
+            }
+        }
+
         const user = new User({
             name,
             email,
             passwordHash: hashedPassword,
             role: role || 'employee',
-            office,
+            office: finalOffice,
             jobTitle
         });
 
@@ -87,14 +95,14 @@ export const createQRToken = async (req: AuthRequest, res: Response) => {
         today5PM.setHours(17, 0, 0, 0); // 5:00 PM
 
         // If it's already past 5 PM, set expiration to 5 PM tomorrow
-        const expiresAt = now > today5PM 
+        const expiresAt = now > today5PM
             ? new Date(today5PM.getTime() + 24 * 60 * 60 * 1000) // Tomorrow at 5 PM
             : today5PM; // Today at 5 PM
 
         const expiresInMinutes = Math.ceil((expiresAt.getTime() - now.getTime()) / (60 * 1000));
 
         const token = generateQRToken(officeId, req.user.id, expiresInMinutes);
-        
+
         return successResponse(res, 'QR Token generated successfully', {
             token,
             officeId,
